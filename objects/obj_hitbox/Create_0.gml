@@ -27,7 +27,7 @@ hitList = ds_list_create();  // What's been hit already
 destroyOnHit = false;  // Destroy after first hit?
 
 // Visual debug
-debug_show = true;
+debug_show = false;
 debug_color = c_yellow;
 debug_alpha = 0.5;
 

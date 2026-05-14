@@ -2,7 +2,7 @@
 owner = noone;
 
 // Visual debug toggle
-debug_show = true;
+debug_show = false;
 debug_color = c_red;
 debug_alpha = 0.4;
 

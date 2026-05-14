@@ -39,7 +39,7 @@ else if (!isDashing && !isBackStepping && dashCooldownTimer <= 0
     dashCharges--;
     moveDir = rightKey - leftKey;
     dashDir = (moveDir != 0) ? moveDir : face;
-    face = dashDir;
+    if (inputLockFace <= 0) { face = dashDir; }
     dashWasAir = !onGround;
     xspd = dashDir * dashSpeed;
     yspd = 0;
@@ -158,47 +158,38 @@ if (!isAttacking && !isDashing && !isClimbing && !grappling && onGround && attac
 {
     if (downKey)
     {
-        isAttacking = true;
-        attackName = "crouch";
-        attackFrame = 0;
-        attackFrameMax = attack_crouch_frames;
-        attack_crouch_hitboxSpawned = false;
-        
-        inputLockMove = attackFrameMax;
-        inputLockFace = attackFrameMax;
-        inputLockJump = attackFrameMax;
-        
+        attackName     = "crouch";
+        isAttacking    = true;
+        attackFrame    = 0;
+        attackFrameMax = sprite_get_number(attackTable.crouch.sprite);
+        inputLockMove  = attackFrameMax;
+        inputLockFace  = attackFrameMax;
+        inputLockJump  = attackFrameMax;
         xspd = 0;
     }
     else
     {
-        isAttacking = true;
-        attackName = "standingSwing1";
-        attackFrame = 0;
-        attackFrameMax = attack_standingSwing1_frames;
-        attack_standingSwing1_hitboxSpawned = false;
-        
-        inputLockMove = attackFrameMax;
-        inputLockFace = attackFrameMax;
-        inputLockJump = attackFrameMax;
-        
+        attackName     = "standingSwing1";
+        isAttacking    = true;
+        attackFrame    = 0;
+        attackFrameMax = sprite_get_number(attackTable.standingSwing1.sprite);
+        inputLockMove  = attackFrameMax;
+        inputLockFace  = attackFrameMax;
+        inputLockJump  = attackFrameMax;
         xspd = 0;
     }
 }
 
-// AIR ATTACK (jump attack)
+// AIR ATTACK
 if (!isAttacking && !isDashing && !isClimbing && !grappling && !onGround && attackKey)
 {
-    isAttacking = true;
-    attackName = "jump";
-    attackFrame = 0;
-    attackFrameMax = attack_jump_frames;
-    attack_jump_hitboxSpawned = false;
-    
-    inputLockMove = attackFrameMax;
-    inputLockFace = attackFrameMax;
-    inputLockJump = attackFrameMax;
-    
+    attackName     = "jump";
+    isAttacking    = true;
+    attackFrame    = 0;
+    attackFrameMax = sprite_get_number(attackTable.jump.sprite);
+    inputLockMove  = attackFrameMax;
+    inputLockFace  = attackFrameMax;
+    inputLockJump  = attackFrameMax;
     xspd *= 0.5;
 }
 #endregion
@@ -485,161 +476,7 @@ else
 #region ATTACK STATE LOGIC
 if (isAttacking)
 {
-    attackFrame++;
-    
-    if (attackName == "standingSwing1")
-    {
-        if (floor(image_index) == 2 && !attack_standingSwing1_hitboxSpawned)
-        {
-            myAttackHitbox = instance_create_depth(x, y, depth - 1, obj_hitbox);
-            myAttackHitbox.owner = id;
-            myAttackHitbox.followOwner = true;
-            myAttackHitbox.offsetX = 15;
-            myAttackHitbox.offsetY = -30;
-            myAttackHitbox.hitboxWidth = 20;
-            myAttackHitbox.hitboxHeight = 20;
-            myAttackHitbox.damage = 10;
-            myAttackHitbox.lifetime = 0;
-            myAttackHitbox.debug_color = c_yellow;
-            attack_standingSwing1_hitboxSpawned = true;
-        }
-        
-        if (floor(image_index) >= 4 && instance_exists(myAttackHitbox))
-        {
-            instance_destroy(myAttackHitbox);
-            myAttackHitbox = noone;
-        }
-        
-        var _spriteFrames = sprite_get_number(attackSwing1Spr);
-        if (floor(image_index) >= _spriteFrames - 1)
-        {
-            isAttacking = false;
-            attackName = "";
-            attackFrame = 0;
-            
-            if (instance_exists(myAttackHitbox))
-            {
-                instance_destroy(myAttackHitbox);
-                myAttackHitbox = noone;
-            }
-        }
-    }
-    
-    if (attackName == "crouch")
-    {
-        if (!onGround)
-        {
-            isAttacking = false;
-            attackName = "";
-            attack_crouch_hitboxSpawned = false;
-            
-            if (instance_exists(myAttackHitbox))
-            {
-                instance_destroy(myAttackHitbox);
-                myAttackHitbox = noone;
-            }
-        }
-        else
-        {
-
-        if (floor(image_index) == 2 && !attack_crouch_hitboxSpawned)
-        {
-            myAttackHitbox = instance_create_depth(x, y, depth - 1, obj_hitbox);
-            myAttackHitbox.owner = id;
-            myAttackHitbox.followOwner = true;
-            myAttackHitbox.offsetX = 30;
-            myAttackHitbox.offsetY = -10;
-            myAttackHitbox.hitboxWidth = 50;
-            myAttackHitbox.hitboxHeight = 30;
-            myAttackHitbox.damage = 8;
-            myAttackHitbox.lifetime = 0;
-            myAttackHitbox.debug_color = c_orange;
-            
-            attack_crouch_hitboxSpawned = true;
-        }
-        
-        if (floor(image_index) >= 4 && instance_exists(myAttackHitbox))
-        {
-            instance_destroy(myAttackHitbox);
-            myAttackHitbox = noone;
-        }
-        
-        var _lastFrame = sprite_get_number(attackCrouchSpr) - 1;
-        if (floor(image_index) >= _lastFrame)
-        {
-            image_speed = 0;
-            image_index = _lastFrame;
-            
-            isAttacking = false;
-            attackName = "";
-            attack_crouch_hitboxSpawned = false;
-            
-            if (instance_exists(myAttackHitbox))
-            {
-                instance_destroy(myAttackHitbox);
-                myAttackHitbox = noone;
-            }
-        }
-        } // end else (was on ground)
-    }
-
-    if (attackName == "jump")
-    {
-        if (onGround)
-        {
-            isAttacking = false;
-            attackName = "";
-            attack_jump_hitboxSpawned = false;
-
-            if (instance_exists(myAttackHitbox))
-            {
-                instance_destroy(myAttackHitbox);
-                myAttackHitbox = noone;
-            }
-        }
-        else
-        {
-
-        if (floor(image_index) == 2 && !attack_jump_hitboxSpawned)
-        {
-            myAttackHitbox = instance_create_depth(x, y, depth - 1, obj_hitbox);
-            myAttackHitbox.owner = id;
-            myAttackHitbox.followOwner = true;
-            myAttackHitbox.offsetX = 25;
-            myAttackHitbox.offsetY = -15;
-            myAttackHitbox.hitboxWidth = 45;
-            myAttackHitbox.hitboxHeight = 45;
-            myAttackHitbox.damage = 12;
-            myAttackHitbox.lifetime = 0;
-            myAttackHitbox.debug_color = c_aqua;
-            
-            attack_jump_hitboxSpawned = true;
-        }
-        
-        if (floor(image_index) >= 4 && instance_exists(myAttackHitbox))
-        {
-            instance_destroy(myAttackHitbox);
-            myAttackHitbox = noone;
-        }
-        
-        var _lastFrame = sprite_get_number(attackAirSlashSpr) - 1;
-        if (floor(image_index) >= _lastFrame)
-        {
-            image_speed = 0;
-            image_index = _lastFrame;
-            
-            isAttacking = false;
-            attackName = "";
-            attack_jump_hitboxSpawned = false;
-            
-            if (instance_exists(myAttackHitbox))
-            {
-                instance_destroy(myAttackHitbox);
-                myAttackHitbox = noone;
-            }
-        }
-        } // end else (was in air)
-    }
+    processAttack();
 }
 #endregion
 
@@ -1098,22 +935,14 @@ var _resetAnim = false;
 
 if (isAttacking)
 {
-    // Clear any lingering frame-hold from fall/dash/backstep so attacks always play at full speed
     animFrameHold = false;
     animHoldUntilStateChange = false;
     image_speed = 1;
 
-    if (attackName == "standingSwing1")
+    var _attackData = attackTable[$ attackName];
+    if (_attackData != undefined)
     {
-        _newSprite = attackSwing1Spr;
-    }
-    else if (attackName == "crouch")
-    {
-        _newSprite = attackCrouchSpr;
-    }
-    else if (attackName == "jump")
-    {
-        _newSprite = attackAirSlashSpr;
+        _newSprite = _attackData.sprite;
     }
 }
 else if (isBackStepping)
@@ -1285,31 +1114,31 @@ afterimageEnabled = false;
 if (isDashing)
 {
     afterimageEnabled = true;
-    afterimageColor = c_aqua;
+    afterimageColor = afterimageColorDash;
 }
 
 if (isBackStepping)
 {
     afterimageEnabled = true;
-    afterimageColor = c_orange;
+    afterimageColor = afterimageColorBackStep;
 }
 
 if (airState == AirState.A_WALLJUMP && wallJumpLockTimer > 0)
 {
     afterimageEnabled = true;
-    afterimageColor = c_yellow;
+    afterimageColor = afterimageColorWallJump;
 }
 
 if (abs(xspd) > 4 || abs(yspd) > 4)
 {
     afterimageEnabled = true;
-    afterimageColor = c_white;
+    afterimageColor = afterimageColorSpeed;
 }
 
 if (grappling)
 {
     afterimageEnabled = true;
-    afterimageColor = c_lime;
+    afterimageColor = afterimageColorGrapple;
 }
 
 if (afterimageEnabled)
@@ -1344,90 +1173,46 @@ var isWallSliding = (airState == AirState.A_WALLCLING && wallStickTimer <= 0);
 
 if (isDashing && dashLockTimer == dashLockFrames - 1)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxDashDust);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxDashDust, 1);
 }
 
 if (isBackStepping && backStepLockTimer == backStepLockFrames - 1)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxBackStepDust);
-    _fx.owner = id;
-    _fx.initializeFX();
-}
-
-if (!variable_instance_exists(id, "prevJumpCount"))
-{
-    prevJumpCount = 0;
+    spawnFX(obj_fxBackStepDust, 1);
 }
 
 if (jumpCount > prevJumpCount && jumpCount == 1)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxJumpDust);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxJumpDust, 1);
 }
-
 prevJumpCount = jumpCount;
-
-if (!variable_instance_exists(id, "prevAirStateWallJump"))
-{
-    prevAirStateWallJump = AirState.A_NONE;
-}
 
 if (prevAirStateWallJump == AirState.A_WALLCLING && airState == AirState.A_WALLJUMP)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxWallJumpDust);
-    _fx.owner = id;
-    _fx.fxDirection = prevWallDir;
-    _fx.initializeFX();
+    var _wjFX = spawnFX(obj_fxWallJumpDust, 1);
+    _wjFX.fxDirection = prevWallDir;
 }
-
 prevAirStateWallJump = airState;
-
-if (!variable_instance_exists(id, "prevJumpCountDouble"))
-{
-    prevJumpCountDouble = 0;
-}
 
 if (jumpCount > prevJumpCountDouble && jumpCount == 2)
 {
-    var _fx = instance_create_depth(x, y, depth - 1, obj_fxDoubleJump);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxDoubleJump, -1);
 }
-
 prevJumpCountDouble = jumpCount;
-
-if (!variable_instance_exists(id, "prevOnGround"))
-{
-    prevOnGround = false;
-}
 
 if (onGround && !prevOnGround)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxLandingDust);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxLandingDust, 1);
 }
-
 prevOnGround = onGround;
-
-if (!variable_instance_exists(id, "runDustTimer"))
-{
-    runDustTimer = 0;
-}
 
 if (onGround && groundState == GroundState.G_RUN && abs(xspd) > 2)
 {
     runDustTimer++;
-    
+
     if (runDustTimer >= 8)
     {
-        var _fx = instance_create_depth(x, y, depth + 1, obj_fxRunDust);
-        _fx.owner = id;
-        _fx.initializeFX();
-        
+        spawnFX(obj_fxRunDust, 1);
         runDustTimer = 0;
     }
 }
@@ -1436,16 +1221,9 @@ else
     runDustTimer = 0;
 }
 
-if (!variable_instance_exists(id, "myWallSlideFX"))
-{
-    myWallSlideFX = noone;
-}
-
 if (isWallSliding && !instance_exists(myWallSlideFX))
 {
-    myWallSlideFX = instance_create_depth(x, y, depth - 1, obj_fxWallSlide);
-    myWallSlideFX.owner = id;
-    myWallSlideFX.initializeFX();
+    myWallSlideFX = spawnFX(obj_fxWallSlide, -1);
 }
 
 if (!instance_exists(myWallSlideFX))
