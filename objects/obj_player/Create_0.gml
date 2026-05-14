@@ -254,7 +254,7 @@
 
 #region Grapple System
 	// Visual debug
-	debug_grapple_show = true;
+	debug_grapple_show = false;
 	
 	// Scan box dimensions (starts at player's feet)
 	grappleScanWidth   = 120;  // 120  Width of scan area
@@ -326,7 +326,7 @@
     // Sprites
     ledgeGrabSpr = spr_ledgeGrab;   // Initial grab animation
     ledgeHangSpr = spr_ledgeHang;   // Looping hang animation
-	debug_ledge_show = true;  // ADD THIS LINE!
+	debug_ledge_show = false;
 
 	
 	#region Ledge Grab Functions
@@ -542,7 +542,7 @@
 	// Create hurtbox as child object
 	myHurtbox = instance_create_depth(x, y, depth + 1, obj_hurtbox);
 	myHurtbox.owner = id;
-	myHurtbox.debug_show = true;  // Set to false to hide
+	myHurtbox.debug_show = false;
 	myHurtbox.debug_color = c_red;
 #endregion
 
@@ -643,4 +643,22 @@
     afterimageTimer = 0;         // Current timer
     afterimageEnabled = false;   // Is spawning active?
     afterimageColor = c_white;   // Tint color (white = normal)
+
+    // Named colors — edit here to change trail look per-state
+    afterimageColorDash     = c_aqua;
+    afterimageColorBackStep = c_orange;
+    afterimageColorWallJump = c_yellow;
+    afterimageColorSpeed    = c_white;
+    afterimageColorGrapple  = c_lime;
+#endregion
+
+#region FX STATE TRACKING
+    // Previous-frame values used to detect FX trigger moments.
+    // Initialized here so Step_0 never needs variable_instance_exists checks.
+    prevJumpCount        = 0;
+    prevAirStateWallJump = AirState.A_NONE;
+    prevJumpCountDouble  = 0;
+    prevOnGround         = false;
+    runDustTimer         = 0;
+    myWallSlideFX        = noone;
 #endregion

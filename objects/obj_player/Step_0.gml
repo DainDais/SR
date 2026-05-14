@@ -39,7 +39,7 @@ else if (!isDashing && !isBackStepping && dashCooldownTimer <= 0
     dashCharges--;
     moveDir = rightKey - leftKey;
     dashDir = (moveDir != 0) ? moveDir : face;
-    face = dashDir;
+    if (inputLockFace <= 0) { face = dashDir; }
     dashWasAir = !onGround;
     xspd = dashDir * dashSpeed;
     yspd = 0;
@@ -1115,31 +1115,31 @@ afterimageEnabled = false;
 if (isDashing)
 {
     afterimageEnabled = true;
-    afterimageColor = c_aqua;
+    afterimageColor = afterimageColorDash;
 }
 
 if (isBackStepping)
 {
     afterimageEnabled = true;
-    afterimageColor = c_orange;
+    afterimageColor = afterimageColorBackStep;
 }
 
 if (airState == AirState.A_WALLJUMP && wallJumpLockTimer > 0)
 {
     afterimageEnabled = true;
-    afterimageColor = c_yellow;
+    afterimageColor = afterimageColorWallJump;
 }
 
 if (abs(xspd) > 4 || abs(yspd) > 4)
 {
     afterimageEnabled = true;
-    afterimageColor = c_white;
+    afterimageColor = afterimageColorSpeed;
 }
 
 if (grappling)
 {
     afterimageEnabled = true;
-    afterimageColor = c_lime;
+    afterimageColor = afterimageColorGrapple;
 }
 
 if (afterimageEnabled)
@@ -1174,90 +1174,46 @@ var isWallSliding = (airState == AirState.A_WALLCLING && wallStickTimer <= 0);
 
 if (isDashing && dashLockTimer == dashLockFrames - 1)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxDashDust);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxDashDust, 1);
 }
 
 if (isBackStepping && backStepLockTimer == backStepLockFrames - 1)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxBackStepDust);
-    _fx.owner = id;
-    _fx.initializeFX();
-}
-
-if (!variable_instance_exists(id, "prevJumpCount"))
-{
-    prevJumpCount = 0;
+    spawnFX(obj_fxBackStepDust, 1);
 }
 
 if (jumpCount > prevJumpCount && jumpCount == 1)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxJumpDust);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxJumpDust, 1);
 }
-
 prevJumpCount = jumpCount;
-
-if (!variable_instance_exists(id, "prevAirStateWallJump"))
-{
-    prevAirStateWallJump = AirState.A_NONE;
-}
 
 if (prevAirStateWallJump == AirState.A_WALLCLING && airState == AirState.A_WALLJUMP)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxWallJumpDust);
-    _fx.owner = id;
-    _fx.fxDirection = prevWallDir;
-    _fx.initializeFX();
+    var _wjFX = spawnFX(obj_fxWallJumpDust, 1);
+    _wjFX.fxDirection = prevWallDir;
 }
-
 prevAirStateWallJump = airState;
-
-if (!variable_instance_exists(id, "prevJumpCountDouble"))
-{
-    prevJumpCountDouble = 0;
-}
 
 if (jumpCount > prevJumpCountDouble && jumpCount == 2)
 {
-    var _fx = instance_create_depth(x, y, depth - 1, obj_fxDoubleJump);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxDoubleJump, -1);
 }
-
 prevJumpCountDouble = jumpCount;
-
-if (!variable_instance_exists(id, "prevOnGround"))
-{
-    prevOnGround = false;
-}
 
 if (onGround && !prevOnGround)
 {
-    var _fx = instance_create_depth(x, y, depth + 1, obj_fxLandingDust);
-    _fx.owner = id;
-    _fx.initializeFX();
+    spawnFX(obj_fxLandingDust, 1);
 }
-
 prevOnGround = onGround;
-
-if (!variable_instance_exists(id, "runDustTimer"))
-{
-    runDustTimer = 0;
-}
 
 if (onGround && groundState == GroundState.G_RUN && abs(xspd) > 2)
 {
     runDustTimer++;
-    
+
     if (runDustTimer >= 8)
     {
-        var _fx = instance_create_depth(x, y, depth + 1, obj_fxRunDust);
-        _fx.owner = id;
-        _fx.initializeFX();
-        
+        spawnFX(obj_fxRunDust, 1);
         runDustTimer = 0;
     }
 }
@@ -1266,16 +1222,9 @@ else
     runDustTimer = 0;
 }
 
-if (!variable_instance_exists(id, "myWallSlideFX"))
-{
-    myWallSlideFX = noone;
-}
-
 if (isWallSliding && !instance_exists(myWallSlideFX))
 {
-    myWallSlideFX = instance_create_depth(x, y, depth - 1, obj_fxWallSlide);
-    myWallSlideFX.owner = id;
-    myWallSlideFX.initializeFX();
+    myWallSlideFX = spawnFX(obj_fxWallSlide, -1);
 }
 
 if (!instance_exists(myWallSlideFX))

@@ -66,6 +66,19 @@ function getControls()
 		jumpKeyBuffered = 0;
 	}
 }
+// === FX: SPAWN FX OBJECT ===
+// Spawns an FX object at the caller's position, sets its owner, and calls initializeFX().
+// Returns the created instance so additional properties can be set afterward.
+// Usage:   spawnFX(obj_fxDashDust, 1);
+//          var _fx = spawnFX(obj_fxWallJumpDust, 1);  _fx.fxDirection = prevWallDir;
+function spawnFX(_obj, _depthOffset)
+{
+    var _fx = instance_create_depth(x, y, depth + _depthOffset, _obj);
+    _fx.owner = id;
+    _fx.initializeFX();
+    return _fx;
+}
+
 // === FX: GET SPAWN POINT ===
 // Returns [x, y] array for FX spawn position
 function getSpawnPoint(_owner, _pointType, _offsetX, _offsetY, _direction)
