@@ -254,7 +254,7 @@
 
 #region Grapple System
 	// Visual debug
-	debug_grapple_show = true;
+	debug_grapple_show = false;
 	
 	// Scan box dimensions (starts at player's feet)
 	grappleScanWidth   = 120;  // 120  Width of scan area
@@ -326,7 +326,7 @@
     // Sprites
     ledgeGrabSpr = spr_ledgeGrab;   // Initial grab animation
     ledgeHangSpr = spr_ledgeHang;   // Looping hang animation
-	debug_ledge_show = true;  // ADD THIS LINE!
+	debug_ledge_show = false;
 
 	
 	#region Ledge Grab Functions
@@ -542,7 +542,7 @@
 	// Create hurtbox as child object
 	myHurtbox = instance_create_depth(x, y, depth + 1, obj_hurtbox);
 	myHurtbox.owner = id;
-	myHurtbox.debug_show = true;  // Set to false to hide
+	myHurtbox.debug_show = false;
 	myHurtbox.debug_color = c_red;
 #endregion
 
@@ -570,6 +570,72 @@
 	
 	// Reference to current attack hitbox
 	myAttackHitbox = noone;
+
+	// -------------------------------------------------------------------------
+	// Attack data table — one entry per attack.
+	// processAttack() reads from here so adding a new attack = one new entry.
+	//
+	// Fields:
+	//   sprite         — sprite asset to display during the attack
+	//   hitboxFrame    — frame on which the hitbox is created (floor(image_index))
+	//   hitboxEndFrame — frame on which the hitbox is destroyed (floor(image_index) >=)
+	//   damage         — damage dealt on hit
+	//   offsetX        — hitbox X offset (signed by face direction in obj_hitbox)
+	//   offsetY        — hitbox Y offset
+	//   width/height   — hitbox dimensions
+	//   cancelOnAir    — true = cancel attack if player leaves ground
+	//   cancelOnGround — true = cancel attack if player lands
+	//   holdLastFrame  — true = freeze animation on last frame when ending
+	//   debugColor     — hitbox debug tint colour
+	//   hitboxSpawned  — runtime flag, managed by processAttack/endAttack
+	// -------------------------------------------------------------------------
+	attackTable = {
+	    standingSwing1: {
+	        sprite:         attackSwing1Spr,
+	        hitboxFrame:    2,
+	        hitboxEndFrame: 4,
+	        damage:         10,
+	        offsetX:        15,
+	        offsetY:        -30,
+	        width:          20,
+	        height:         20,
+	        cancelOnAir:    false,
+	        cancelOnGround: false,
+	        holdLastFrame:  false,
+	        debugColor:     c_yellow,
+	        hitboxSpawned:  false,
+	    },
+	    crouch: {
+	        sprite:         attackCrouchSpr,
+	        hitboxFrame:    2,
+	        hitboxEndFrame: 4,
+	        damage:         8,
+	        offsetX:        30,
+	        offsetY:        -10,
+	        width:          50,
+	        height:         30,
+	        cancelOnAir:    true,
+	        cancelOnGround: false,
+	        holdLastFrame:  true,
+	        debugColor:     c_orange,
+	        hitboxSpawned:  false,
+	    },
+	    jump: {
+	        sprite:         attackAirSlashSpr,
+	        hitboxFrame:    2,
+	        hitboxEndFrame: 4,
+	        damage:         12,
+	        offsetX:        25,
+	        offsetY:        -15,
+	        width:          45,
+	        height:         45,
+	        cancelOnAir:    false,
+	        cancelOnGround: true,
+	        holdLastFrame:  true,
+	        debugColor:     c_aqua,
+	        hitboxSpawned:  false,
+	    },
+	}
 #endregion
 
 #region AFTERIMAGE SYSTEM
@@ -577,4 +643,22 @@
     afterimageTimer = 0;         // Current timer
     afterimageEnabled = false;   // Is spawning active?
     afterimageColor = c_white;   // Tint color (white = normal)
+
+    // Named colors — edit here to change trail look per-state
+    afterimageColorDash     = c_aqua;
+    afterimageColorBackStep = c_orange;
+    afterimageColorWallJump = c_yellow;
+    afterimageColorSpeed    = c_white;
+    afterimageColorGrapple  = c_lime;
+#endregion
+
+#region FX STATE TRACKING
+    // Previous-frame values used to detect FX trigger moments.
+    // Initialized here so Step_0 never needs variable_instance_exists checks.
+    prevJumpCount        = 0;
+    prevAirStateWallJump = AirState.A_NONE;
+    prevJumpCountDouble  = 0;
+    prevOnGround         = false;
+    runDustTimer         = 0;
+    myWallSlideFX        = noone;
 #endregion
