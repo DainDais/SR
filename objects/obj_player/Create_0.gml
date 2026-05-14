@@ -570,6 +570,72 @@
 	
 	// Reference to current attack hitbox
 	myAttackHitbox = noone;
+
+	// -------------------------------------------------------------------------
+	// Attack data table — one entry per attack.
+	// processAttack() reads from here so adding a new attack = one new entry.
+	//
+	// Fields:
+	//   sprite         — sprite asset to display during the attack
+	//   hitboxFrame    — frame on which the hitbox is created (floor(image_index))
+	//   hitboxEndFrame — frame on which the hitbox is destroyed (floor(image_index) >=)
+	//   damage         — damage dealt on hit
+	//   offsetX        — hitbox X offset (signed by face direction in obj_hitbox)
+	//   offsetY        — hitbox Y offset
+	//   width/height   — hitbox dimensions
+	//   cancelOnAir    — true = cancel attack if player leaves ground
+	//   cancelOnGround — true = cancel attack if player lands
+	//   holdLastFrame  — true = freeze animation on last frame when ending
+	//   debugColor     — hitbox debug tint colour
+	//   hitboxSpawned  — runtime flag, managed by processAttack/endAttack
+	// -------------------------------------------------------------------------
+	attackTable = {
+	    standingSwing1: {
+	        sprite:         attackSwing1Spr,
+	        hitboxFrame:    2,
+	        hitboxEndFrame: 4,
+	        damage:         10,
+	        offsetX:        15,
+	        offsetY:        -30,
+	        width:          20,
+	        height:         20,
+	        cancelOnAir:    false,
+	        cancelOnGround: false,
+	        holdLastFrame:  false,
+	        debugColor:     c_yellow,
+	        hitboxSpawned:  false,
+	    },
+	    crouch: {
+	        sprite:         attackCrouchSpr,
+	        hitboxFrame:    2,
+	        hitboxEndFrame: 4,
+	        damage:         8,
+	        offsetX:        30,
+	        offsetY:        -10,
+	        width:          50,
+	        height:         30,
+	        cancelOnAir:    true,
+	        cancelOnGround: false,
+	        holdLastFrame:  true,
+	        debugColor:     c_orange,
+	        hitboxSpawned:  false,
+	    },
+	    jump: {
+	        sprite:         attackAirSlashSpr,
+	        hitboxFrame:    2,
+	        hitboxEndFrame: 4,
+	        damage:         12,
+	        offsetX:        25,
+	        offsetY:        -15,
+	        width:          45,
+	        height:         45,
+	        cancelOnAir:    false,
+	        cancelOnGround: true,
+	        holdLastFrame:  true,
+	        debugColor:     c_aqua,
+	        hitboxSpawned:  false,
+	    },
+	}
 #endregion
 
 #region AFTERIMAGE SYSTEM

@@ -74,6 +74,7 @@
     {"id":{"name":"Initiation_room","path":"rooms/Initiation_room/Initiation_room.yy",},},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
     {"id":{"name":"general_functions","path":"scripts/general_functions/general_functions.yy",},},
+    {"id":{"name":"player_attacks","path":"scripts/player_attacks/player_attacks.yy",},},
     {"id":{"name":"BGM_Battle_03","path":"sounds/BGM_Battle_03/BGM_Battle_03.yy",},},
     {"id":{"name":"BGM_Dungeon_Forest_01","path":"sounds/BGM_Dungeon_Forest_01/BGM_Dungeon_Forest_01.yy",},},
     {"id":{"name":"BGM_Suspense_02","path":"sounds/BGM_Suspense_02/BGM_Suspense_02.yy",},},
