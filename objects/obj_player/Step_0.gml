@@ -103,7 +103,7 @@ if (inputLockJump > 0)
     
         if _listInst.bbox_bottom - _listInst.yspd <= bbox_top+1
         {
-            if !instance_exists(_topWall) || _listInst.yspd <= bbox_top+1
+            if !instance_exists(_topWall) || _listInst.bbox_bottom + _listInst.yspd <= _topWall.bbox_bottom + _topWall.yspd
             {
                 _topWall = _listInst;
             }
@@ -511,7 +511,7 @@ if (isAttacking)
         }
         
         var _spriteFrames = sprite_get_number(attackSwing1Spr);
-        if (image_index >= _spriteFrames - 0.1)
+        if (floor(image_index) >= _spriteFrames - 1)
         {
             isAttacking = false;
             attackName = "";
@@ -538,9 +538,10 @@ if (isAttacking)
                 instance_destroy(myAttackHitbox);
                 myAttackHitbox = noone;
             }
-            exit;
         }
-        
+        else
+        {
+
         if (floor(image_index) == 2 && !attack_crouch_hitboxSpawned)
         {
             myAttackHitbox = instance_create_depth(x, y, depth - 1, obj_hitbox);
@@ -579,8 +580,9 @@ if (isAttacking)
                 myAttackHitbox = noone;
             }
         }
+        } // end else (was on ground)
     }
-    
+
     if (attackName == "jump")
     {
         if (onGround)
@@ -588,15 +590,16 @@ if (isAttacking)
             isAttacking = false;
             attackName = "";
             attack_jump_hitboxSpawned = false;
-            
+
             if (instance_exists(myAttackHitbox))
             {
                 instance_destroy(myAttackHitbox);
                 myAttackHitbox = noone;
             }
-            exit;
         }
-        
+        else
+        {
+
         if (floor(image_index) == 2 && !attack_jump_hitboxSpawned)
         {
             myAttackHitbox = instance_create_depth(x, y, depth - 1, obj_hitbox);
@@ -635,6 +638,7 @@ if (isAttacking)
                 myAttackHitbox = noone;
             }
         }
+        } // end else (was in air)
     }
 }
 #endregion
@@ -657,6 +661,7 @@ if (isAttacking)
 	    prevWallDir    = 0;
 	    wallStickTimer = 0;
 	    wallJumpLockTimer = 0;
+	    lockY          = false;
 
 	   if (downKey)
 	{
@@ -1093,6 +1098,11 @@ var _resetAnim = false;
 
 if (isAttacking)
 {
+    // Clear any lingering frame-hold from fall/dash/backstep so attacks always play at full speed
+    animFrameHold = false;
+    animHoldUntilStateChange = false;
+    image_speed = 1;
+
     if (attackName == "standingSwing1")
     {
         _newSprite = attackSwing1Spr;
