@@ -464,76 +464,7 @@
 	depth = -30;
 #endregion
 
-#region Grapple Functions
-	// Get scan rectangle (starts at player's feet, extends forward and up)
-	grapple_get_scan_rect = function()
-	{
-	    // Start from player's feet
-	    var feetY = bbox_bottom;
-	    
-	    // Center X is at player position + offset
-	    var cx = x + (grappleScanXOffset * face);
-	    
-	    // Top of scan box is above the feet by the scan height
-	    var cy = feetY - (grappleScanHeight * 0.5) + grappleScanYOffset;
-	    
-	    var halfW = grappleScanWidth * 0.5;
-	    var halfH = grappleScanHeight * 0.5;
-	    
-	    return [
-	        cx - halfW,  // left
-	        cy - halfH,  // top
-	        cx + halfW,  // right
-	        cy + halfH   // bottom
-	    ];
-	};
-	
-	// Find best grapple point in scan area
-	function grapple_find_best_target()
-	{
-	    var r = grapple_get_scan_rect();
-	    return grapple_find_best_in_rect(r[0], r[1], r[2], r[3]);
-	}
-	
-	// Find best point inside rectangle
-	function grapple_find_best_in_rect(_left, _top, _right, _bottom)
-	{
-	    var list = ds_list_create();
-	    var n = collision_rectangle_list(
-	        _left, _top, _right, _bottom,
-	        obj_grapplePoint, false, false,
-	        list, false
-	    );
-	    
-	    var best   = noone;
-	    var bestD2 = 999999999;
-	    
-	    for (var i = 0; i < n; i++)
-	    {
-	        var gp = list[| i];
-	        
-	        // Only consider points in front of player
-	        if ((gp.x - x) * face <= 0) continue;
-	        
-	        // Only consider points above player
-	        if (gp.y > y) continue;
-	        
-	        // Find closest point
-	        var dx = gp.x - x;
-	        var dy = gp.y - y;
-	        var d2 = dx*dx + dy*dy;
-	        
-	        if (d2 < bestD2)
-	        {
-	            bestD2 = d2;
-	            best   = gp;
-	        }
-	    }
-	    
-	    ds_list_destroy(list);
-	    return best;
-	}
-#endregion
+// Grapple functions moved to scripts/player_grapple/player_grapple.gml
 
 #region HURTBOX
 	// Create hurtbox as child object
