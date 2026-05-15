@@ -142,17 +142,17 @@
 	}
 
 	function getAirStateName()
-{
-    switch (airState)
-    {
-        case AirState.A_NONE:      return "NONE";
-        case AirState.A_FALL:      return "FALL";
-        case AirState.A_WALLCLING: return "WALLCLING";
-        case AirState.A_WALLJUMP:  return "WALLJUMP";
-        case AirState.A_LEDGEGRAB: return "LEDGEGRAB"; 
-    }
-    return "UNKNOWN";
-}
+	{
+	    switch (airState)
+	    {
+	        case AirState.A_NONE:      return "NONE";
+	        case AirState.A_FALL:      return "FALL";
+	        case AirState.A_WALLCLING: return "WALLCLING";
+	        case AirState.A_WALLJUMP:  return "WALLJUMP";
+	        case AirState.A_LEDGEGRAB: return "LEDGEGRAB"; 
+	    }
+	    return "UNKNOWN";
+	}
 
 
 	// Parent states
@@ -169,7 +169,6 @@
 	    G_CROUCH = 3
 	}
 
-	// Air substates
 	// Air substates
 	enum AirState {
 	    A_NONE      = 0, // generic air (going up, neutral)
@@ -535,8 +534,6 @@
 	    return best;
 	}
 #endregion
-
-
 
 #region HURTBOX
 	// Create hurtbox as child object

@@ -15,16 +15,16 @@ draw_text(16, 48, "Substate: " + _subName);
 draw_text(16, 80, "=== GLOBAL STATES ===");
 draw_text(16, 96, "Attacking: " + string(isAttacking));
 draw_text(16, 112, "Dashing: " + string(isDashing));
-draw_text(16, 128, "BackStepping: " + string(isBackStepping));  // NEW
+draw_text(16, 128, "BackStepping: " + string(isBackStepping));
 draw_text(16, 144, "Climbing: " + string(isClimbing));
 draw_text(16, 160, "Grappling: " + string(grappling));
 draw_text(100, 176, "LedgeGrab: " + string(isLedgeGrabbing));
 
-// Attack details (y=192/208 — attack and grapple are mutually exclusive so no overlap)
+// Attack details (y=232/248 — between Dash Cooldown and Locks, nothing else uses these slots)
 if (isAttacking)
 {
-    draw_text(16, 192, "  Attack: " + attackName);
-    draw_text(16, 208, "  Frame: " + string(floor(image_index)) + "/" + string(sprite_get_number(sprite_index) - 1));
+    draw_text(16, 232, "  Attack: " + attackName);
+    draw_text(16, 248, "  Frame: " + string(floor(image_index)) + "/" + string(sprite_get_number(sprite_index) - 1));
 }
 
 // Grapple details
@@ -99,4 +99,3 @@ draw_text(16, 624, "Timer: " + string(afterimageTimer) + "/" + string(afterimage
 draw_text(16, 640, "Afterimages in room: " + string(instance_number(obj_afterimage)));
 draw_text(16, 656, "Player xspd: " + string(abs(xspd)));
 #endregion
-
