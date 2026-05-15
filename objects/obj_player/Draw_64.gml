@@ -20,11 +20,11 @@ draw_text(16, 144, "Climbing: " + string(isClimbing));
 draw_text(16, 160, "Grappling: " + string(grappling));
 draw_text(100, 176, "LedgeGrab: " + string(isLedgeGrabbing));
 
-// Attack details
+// Attack details (y=192/208 — attack and grapple are mutually exclusive so no overlap)
 if (isAttacking)
 {
-    draw_text(16, 160, "  Attack: " + attackName);
-    draw_text(16, 176, "  Frame: " + string(floor(image_index)) + "/" + string(sprite_get_number(sprite_index) - 1));
+    draw_text(16, 192, "  Attack: " + attackName);
+    draw_text(16, 208, "  Frame: " + string(floor(image_index)) + "/" + string(sprite_get_number(sprite_index) - 1));
 }
 
 // Grapple details

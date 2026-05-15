@@ -935,14 +935,22 @@ var _resetAnim = false;
 
 if (isAttacking)
 {
-    animFrameHold = false;
-    animHoldUntilStateChange = false;
-    image_speed = 1;
-
     var _attackData = attackTable[$ attackName];
     if (_attackData != undefined)
     {
         _newSprite = _attackData.sprite;
+
+        // Preserve the freeze when holding on the last frame
+        var _atLastFrame = _attackData.holdLastFrame
+            && floor(image_index) >= sprite_get_number(_attackData.sprite) - 1;
+
+        if (!_atLastFrame)
+        {
+            // Clear any lingering frame-hold so the attack plays at full speed
+            animFrameHold = false;
+            animHoldUntilStateChange = false;
+            image_speed = 1;
+        }
     }
 }
 else if (isBackStepping)

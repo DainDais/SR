@@ -20,9 +20,15 @@ function endAttack() {
         _data.hitboxSpawned = false;
     }
 
-    isAttacking = false;
-    attackName  = "";
-    attackFrame = 0;
+    isAttacking   = false;
+    attackName    = "";
+    attackFrame   = 0;
+
+    // Clear input locks that were set when the attack started.
+    // Prevents a mid-attack cancel leaving the player stuck.
+    inputLockMove = 0;
+    inputLockFace = 0;
+    inputLockJump = 0;
 
     if (instance_exists(myAttackHitbox)) {
         instance_destroy(myAttackHitbox);
@@ -90,8 +96,11 @@ function processAttack() {
     var _lastFrame = sprite_get_number(_data.sprite) - 1;
     if (floor(image_index) >= _lastFrame) {
         if (_data.holdLastFrame) {
+            // Freeze on last frame, stay in attack state.
+            // cancelOnAir / cancelOnGround act as the natural exit.
             image_speed = 0;
             image_index = _lastFrame;
+            return;
         }
         endAttack();
     }

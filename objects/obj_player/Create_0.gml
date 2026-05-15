@@ -592,7 +592,7 @@
 	        height:         30,
 	        cancelOnAir:    true,
 	        cancelOnGround: false,
-	        holdLastFrame:  true,
+	        holdLastFrame:  false,  // no cancel condition to exit a ground-hold, so end normally
 	        debugColor:     c_orange,
 	        hitboxSpawned:  false,
 	    },
