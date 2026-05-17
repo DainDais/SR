@@ -43,6 +43,10 @@ function endAttack() {
 // -----------------------------------------------------------------------------
 function processAttack() {
 
+    // Nothing to process when not attacking — exit immediately.
+    // This lets Step_0 call processAttack() unconditionally without guards.
+    if (!isAttacking) { return; }
+
     // Look up the data for the active attack
     var _data = attackTable[$ attackName];
 

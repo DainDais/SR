@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"entity_animation",
   "parent":{
-    "name":"Scripts",
-    "path":"folders/Scripts.yy",
+    "name":"Universal Logic",
+    "path":"folders/Scripts/Universal Logic.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
