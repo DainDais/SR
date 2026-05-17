@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"player_dash",
   "parent":{
-    "name":"Scripts",
-    "path":"folders/Scripts.yy",
+    "name":"Player Logic",
+    "path":"folders/Scripts/Player Logic.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
