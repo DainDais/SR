@@ -6,7 +6,7 @@
 //
 // Required variables on the entity:
 //   isDashing, dashDir, lockY, yspd, dashLockTimer, dashLockFrames
-//   dashCooldownTimer, dashCooldownFrames, dashCharges, dashChargesMax, canDash
+//   dashCooldownTimer, dashCooldownFrames, dashCharges, dashChargesMax
 //   isBackStepping, backStepLockTimer, onGround
 // =============================================================================
 
@@ -20,7 +20,6 @@ function processDash() {
     // Restore dash charges when the entity touches the ground.
     if (onGround) {
         dashCharges = dashChargesMax;
-        canDash     = true;
     }
 
     // === DASH COOLDOWN TIMER ===

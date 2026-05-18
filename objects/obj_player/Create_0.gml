@@ -1,7 +1,4 @@
 #region BASIC MOVEMENT VARIABLES
-	airAccel = 0.3;      // 0.3 How fast you accelerate in air
-	airMaxSpeed = 1.5;   // 3.5 Max horizontal speed in air (same as run speed)
-
 	xspd = 0;
 	yspd = 0;
 
@@ -42,9 +39,7 @@
 	coyoteJumpFrames  = 10;
 	coyoteJumpTimer   = 0;
 
-	// Jump buffer
-	jumpKeyBuffered    = false;
-	jumpKeyBufferTimer = 0;
+	// Jump buffer — initialized by controlsSetup() in the CONTROLS region below.
 #endregion
 
 #region PREEMPTIVE TROUBLESHOOT / LOCKS
@@ -60,8 +55,6 @@
 	// Gravity override (for future climbing / grapple)
 	gravityOverride = false;
 
-	// Future dash support – harmless for now
-	canDash = true;
 #endregion
 
 #region MOVING PLATFORM VARS
@@ -178,18 +171,10 @@
 		A_LEDGEGRAB = 4 
 	}
 
-	// Global state 
-	isDashing = false;
-
 	// Current state variables
 	parentState = ParentState.GROUND;
 	groundState = GroundState.G_IDLE;
 	airState    = AirState.A_NONE;
-
-	// Global overlay flags (we'll actually use these later)
-	hasDashState    = false;
-	hasGrappleState = false;
-	hasClimbState   = false;
 #endregion
 
 #region Wall / Air troubleshoot support
@@ -433,9 +418,7 @@
 		ladderClimbSpr = spr_ladderClimb;
 	#endregion
 	#region Combat
-		attackSwing1Spr = spr_standingSlash 
-		attackCrouchSpr = spr_crouchSlash;
-		attackAirSlashSpr = spr_airSlash;
+		// Attack sprites are referenced directly in attackTable below.
 	#endregion
 	// Frame hold settings per sprite (optional)
 	fallSprHoldFrame = 1; // Which frame to hold for fall sprite
@@ -495,7 +478,7 @@
 	// -------------------------------------------------------------------------
 	attackTable = {
 	    standingSwing1: {
-	        sprite:         attackSwing1Spr,
+	        sprite:         spr_standingSlash,
 	        hitboxFrame:    2,
 	        hitboxEndFrame: 4,
 	        damage:         10,
@@ -510,7 +493,7 @@
 	        hitboxSpawned:  false,
 	    },
 	    crouch: {
-	        sprite:         attackCrouchSpr,
+	        sprite:         spr_crouchSlash,
 	        hitboxFrame:    2,
 	        hitboxEndFrame: 4,
 	        damage:         8,
@@ -525,7 +508,7 @@
 	        hitboxSpawned:  false,
 	    },
 	    jump: {
-	        sprite:         attackAirSlashSpr,
+	        sprite:         spr_airSlash,
 	        hitboxFrame:    2,
 	        hitboxEndFrame: 4,
 	        damage:         12,

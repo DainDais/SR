@@ -58,7 +58,7 @@ function applyJump() {
 
     // Execute buffered jump
     if (jumpKeyBuffered && !downKey && jumpCount < jumpMax) {
-        jumpKeyBuffered    = false;
+        jumpKeyBuffered    = 0;
         jumpKeyBufferTimer = 0;
         jumpCount++;
         jumpHoldTimer = jumpHoldFrames[jumpCount - 1];

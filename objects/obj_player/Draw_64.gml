@@ -18,7 +18,7 @@ draw_text(16, 112, "Dashing: " + string(isDashing));
 draw_text(16, 128, "BackStepping: " + string(isBackStepping));
 draw_text(16, 144, "Climbing: " + string(isClimbing));
 draw_text(16, 160, "Grappling: " + string(grappling));
-draw_text(100, 176, "LedgeGrab: " + string(isLedgeGrabbing));
+draw_text(16, 176, "LedgeGrab: " + string(isLedgeGrabbing));
 
 // Attack details (y=232/248 — between Dash Cooldown and Locks, nothing else uses these slots)
 if (isAttacking)
@@ -97,5 +97,14 @@ draw_text(16, 592, "=== AFTERIMAGE ===");
 draw_text(16, 608, "Enabled: " + string(afterimageEnabled));
 draw_text(16, 624, "Timer: " + string(afterimageTimer) + "/" + string(afterimageSpawnRate));
 draw_text(16, 640, "Afterimages in room: " + string(instance_number(obj_afterimage)));
-draw_text(16, 656, "Player xspd: " + string(abs(xspd)));
+draw_text(16, 656, "Speed (abs): " + string(abs(xspd)));
+#endregion
+
+#region PHYSICS DEBUG
+draw_text(16, 688, "=== PHYSICS ===");
+draw_text(16, 704, "onGround: " + string(onGround));
+draw_text(16, 720, "xspd: " + string(round(xspd * 100) / 100));
+draw_text(16, 736, "yspd: " + string(round(yspd * 100) / 100));
+draw_text(16, 752, "wallDir: " + string(wallDir));
+draw_text(16, 768, "wallStickTimer: " + string(wallStickTimer));
 #endregion
