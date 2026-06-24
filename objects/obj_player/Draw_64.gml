@@ -1,3 +1,6 @@
+// F2 toggles the entire debug overlay
+if (!variable_global_exists("debugOverlayVisible") || !global.debugOverlayVisible) exit;
+
 draw_set_colour(c_white);
 
 #region STATES SECTION
@@ -61,6 +64,8 @@ if (_hitboxActive)
 {
     with (obj_hitbox)
     {
+        // Only show debug info for hitboxes owned by the player
+        if (owner != other.id) continue;
         other._hitboxX = x;
         other._hitboxY = y;
         other._hitboxOwnerX = owner.x;
@@ -108,3 +113,113 @@ draw_text(16, 736, "yspd: " + string(round(yspd * 100) / 100));
 draw_text(16, 752, "wallDir: " + string(wallDir));
 draw_text(16, 768, "wallStickTimer: " + string(wallStickTimer));
 #endregion
+
+#region HEALTH DEBUG
+draw_text(300, 16, "=== HEALTH ===");
+
+if (variable_instance_exists(id, "hp"))
+{
+    // Health bar tint: red when low, white otherwise
+    var _hpFraction = (maxHp > 0) ? (hp / maxHp) : 0;
+    if (_hpFraction <= 0.25)
+        draw_set_colour(c_red);
+    else if (_hpFraction <= 0.5)
+        draw_set_colour(c_yellow);
+    else
+        draw_set_colour(c_white);
+
+    draw_text(300, 32, "HP: " + string(hp) + " / " + string(maxHp));
+    draw_set_colour(c_white);
+
+    var _invincStr = isInvincible
+        ? ("INVINCIBLE (" + string(invincibleTimer) + " frames left)")
+        : "Vulnerable";
+    if (isInvincible) draw_set_colour(c_aqua);
+    draw_text(300, 48, _invincStr);
+    draw_set_colour(c_white);
+}
+else
+{
+    draw_text(300, 32, "HP: (no health vars)");
+}
+#endregion
+
+#region INCOMING HIT DEBUG
+draw_text(300, 80, "=== INCOMING HIT ===");
+
+// Check if any non-player hitbox overlaps the player's hurtbox right now
+// Uses collision_rectangle with each enemy hitbox's stored bounds (same method obj_hitbox uses)
+var _incomingHit   = false;
+var _incomingDmg   = 0;
+var _incomingOwner = noone;
+
+with (obj_hitbox)
+{
+    // Skip hitboxes owned by the player
+    if (owner == other.id) continue;
+
+    // Ask: does this hitbox's bounding rect overlap any hurtbox owned by the player?
+    var _h = collision_rectangle(hbLeft, hbTop, hbRight, hbBottom, obj_hurtbox, false, true);
+    if (_h != noone && instance_exists(_h) && _h.owner == other.id)
+    {
+        other._incomingHit   = true;
+        other._incomingDmg   = damage;
+        other._incomingOwner = owner;
+        break;
+    }
+}
+
+if (_incomingHit) draw_set_colour(c_red);
+draw_text(300, 96,  "Contact: " + (_incomingHit ? "YES  dmg=" + string(_incomingDmg) : "none"));
+draw_set_colour(c_white);
+draw_text(300, 112, "Src: " + (_incomingOwner != noone && instance_exists(_incomingOwner)
+    ? object_get_name(_incomingOwner.object_index)
+    : "-"));
+#endregion
+
+#region POSTURE DEBUG
+draw_text(300, 144, "=== POSTURE ===");
+
+if (variable_instance_exists(id, "posture"))
+{
+    // Posture readout tint: red when low, yellow at half, white otherwise
+    var _postFraction = (posture_max > 0) ? (posture / posture_max) : 0;
+    if (_postFraction <= 0.25)
+        draw_set_colour(c_red);
+    else if (_postFraction <= 0.5)
+        draw_set_colour(c_yellow);
+    else
+        draw_set_colour(c_white);
+
+    draw_text(300, 160, "Posture: " + string(posture) + " / " + string(posture_max));
+    draw_set_colour(c_white);
+
+    // Guarding = holding the charge-parry stance (halves posture damage)
+    var _guarding = isParrying && parryState == ParryState.P_CHARGING;
+    if (_guarding) draw_set_colour(c_aqua);
+    draw_text(300, 176, "Guarding: " + string(_guarding)
+        + (_guarding ? "  (x" + string(postureGuardMult) + ")" : ""));
+    draw_set_colour(c_white);
+
+    // Under-parry vulnerability window (amplified posture damage)
+    if (postureVulnTimer > 0) draw_set_colour(c_orange);
+    draw_text(300, 192, "Under-parry: " + (postureVulnTimer > 0
+        ? string(postureVulnTimer) + "f  (x" + string(postureVulnMult) + ")"
+        : "none"));
+    draw_set_colour(c_white);
+
+    // Hit / stun reaction state
+    if (isStunned) draw_set_colour(c_red);
+    else if (isHurt) draw_set_colour(c_orange);
+    draw_text(300, 208, "React: " + (isStunned
+        ? "STUNNED"
+        : (isHurt ? "HURT (" + string(hurtTimer) + "f)" : "none")));
+    draw_set_colour(c_white);
+}
+else
+{
+    draw_text(300, 160, "Posture: (no posture vars)");
+}
+#endregion
+
+draw_set_colour(c_white);

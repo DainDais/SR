@@ -27,7 +27,7 @@
   "origin":7,
   "parent":{
     "name":"Dash",
-    "path":"folders/Sprites/Animations/Advanced Movements/Dash.yy",
+    "path":"folders/Sprites/Animations 1/Advanced Movements/Dash.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

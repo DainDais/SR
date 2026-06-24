@@ -43,9 +43,10 @@ function endAttack() {
 // -----------------------------------------------------------------------------
 function processAttack() {
 
-    // Nothing to process when not attacking — exit immediately.
-    // This lets Step_0 call processAttack() unconditionally without guards.
-    if (!isAttacking) { return; }
+    // Not attacking — nothing to do.
+    // IMPORTANT: do NOT call endAttack() here. endAttack() clears inputLockMove,
+    // which would cancel the dash/wall-jump input lock on every non-attack frame.
+    if (!isAttacking) return;
 
     // Look up the data for the active attack
     var _data = attackTable[$ attackName];

@@ -47,10 +47,21 @@ function getControls()
 		
 	attackKey = keyboard_check_pressed(ord("J")) + gamepad_button_check_pressed(0, gp_face2);
 	    attackKey = clamp(attackKey, 0, 1);
-		
-	// Debug toggle for hurtbox visualization
+
+	parryKey = keyboard_check_pressed(ord("K")) + gamepad_button_check_pressed(0, gp_shoulderr);
+	    parryKey = clamp(parryKey, 0, 1);
+
+	parryKeyHeld = keyboard_check(ord("K")) + gamepad_button_check(0, gp_shoulderr);
+	    parryKeyHeld = clamp(parryKeyHeld, 0, 1);
+
+	// Debug toggle for hurtbox/hitbox visualization (F1)
 	debugHurtboxKey = keyboard_check_pressed(vk_f1);
 		debugHurtboxKey = clamp(debugHurtboxKey, 0, 1);
+
+	// Debug overlay toggle (F2)
+	if (keyboard_check_pressed(vk_f2)) {
+	    global.debugOverlayVisible = !global.debugOverlayVisible;
+	}
 		
 	//Jump key buffering
 	if jumpKeyPressed

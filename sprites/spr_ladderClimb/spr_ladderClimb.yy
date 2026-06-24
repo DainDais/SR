@@ -33,7 +33,7 @@
   "origin":7,
   "parent":{
     "name":"Ladders",
-    "path":"folders/Sprites/Animations/Advanced Movements/Ladders.yy",
+    "path":"folders/Sprites/Animations 1/Advanced Movements/Ladders.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

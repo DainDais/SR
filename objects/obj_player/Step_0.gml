@@ -26,6 +26,7 @@ processDash();
 processGrapple();
 processClimbing();
 processAttack();
+processParry();
 
 // --- HORIZONTAL PHYSICS ---
 // Calculate xspd from input + friction, then resolve against walls.
@@ -59,10 +60,15 @@ updateFX();
 // Input locks tick down last so the locked frame's zeroed inputs have already
 // been consumed by applyXMovement and updateStateMachine.
 tickInputLocks();
+tickHealth();
 
 // --- DEBUG ---
 if (debugHurtboxKey) {
+    global.debugShowHitboxes = !global.debugShowHitboxes;
     with (obj_hurtbox) {
         debug_show = !debug_show;
+    }
+    with (obj_hitbox) {
+        debug_show = global.debugShowHitboxes;
     }
 }

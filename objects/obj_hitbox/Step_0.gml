@@ -23,11 +23,11 @@ if (followOwner)
 }
 else
 {
-    // Independent hitbox (projectiles, etc.)
-    _hbLeft   = x;
-    _hbRight  = x + hitboxWidth;
-    _hbTop    = y;
-    _hbBottom = y + hitboxHeight;
+    // Independent hitbox (projectiles, etc.) — centered on x,y
+    _hbLeft   = x - hitboxWidth  * 0.5;
+    _hbRight  = x + hitboxWidth  * 0.5;
+    _hbTop    = y - hitboxHeight * 0.5;
+    _hbBottom = y + hitboxHeight * 0.5;
 }
 
 // Store bounds for drawing and collision
@@ -61,8 +61,12 @@ var _hitHurtbox = collision_rectangle(_hbLeft, _hbTop, _hbRight, _hbBottom, obj_
 
 if (_hitHurtbox != noone)
 {
-    // Filter: Don't hit your own hurtbox
-    if (_hitHurtbox.owner != owner)
+    // Filter: Don't hit your own hurtbox; don't hit same-team targets (friendly fire)
+    var _sameTeam = (variable_instance_exists(_hitHurtbox.owner, "team")
+                  && variable_instance_exists(id, "team")
+                  && _hitHurtbox.owner.team == team);
+
+    if (_hitHurtbox.owner != owner && !_sameTeam)
     {
         // Check if we've already hit this target
         var _alreadyHit = false;
@@ -75,18 +79,36 @@ if (_hitHurtbox != noone)
             }
         }
         
-        // If not already hit, deal damage
+        // If not already hit, deal damage or register a parry
         if (!_alreadyHit)
         {
-            // Add to hit list
+            // Add to hit list (prevents double-hit regardless of parry or damage)
             ds_list_add(hitList, _hitHurtbox.owner);
-            
-            // Deal damage to the owner (if they have the function)
-            if (instance_exists(_hitHurtbox.owner) && variable_instance_exists(_hitHurtbox.owner, "take_damage"))
+
+            var _target = _hitHurtbox.owner;
+
+            // Pre-calculate values while still in hitbox context
+            var _dmg        = damage;
+            var _postureDmg = postureDamage;
+            var _kbX  = instance_exists(owner) ? knockbackX * owner.face : knockbackX;
+            var _kbY  = knockbackY;
+            var _str  = strengthLevel;
+
+            // Parry window check: redirect to parry handler instead of damage
+            if (instance_exists(_target)
+            && variable_instance_exists(_target, "isParryWindowActive")
+            && _target.isParryWindowActive)
             {
-                _hitHurtbox.owner.take_damage(damage, knockbackX * owner.face, knockbackY);
+                with (_target) { triggerParrySuccess(_dmg, _kbX, _str); }
             }
-            
+            else if (instance_exists(_target) && variable_instance_exists(_target, "hp"))
+            {
+                with (_target) {
+                    // Posture damage only lands when the hit connects (not blocked by i-frames)
+                    if (take_damage(_dmg, _kbX, _kbY)) { take_posture_damage(_postureDmg); }
+                }
+            }
+
             // Destroy hitbox if set to destroy on hit
             if (destroyOnHit)
             {

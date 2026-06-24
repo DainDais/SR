@@ -14,6 +14,17 @@
 // -----------------------------------------------------------------------------
 function processInput() {
 
+    // === HIT / STUN LOCKOUT ===
+    // Posture-break stun: completely locked — drop every input, run no abilities.
+    if (isStunned) {
+        rightKey = 0; leftKey = 0; upKey = 0; downKey = 0;
+        jumpKeyPressed = 0; jumpKeyBuffered = 0; jumpKey = 0;
+        attackKey = 0; dashKey = 0; grappleKey = 0;
+        parryKey = 0; parryKeyHeld = 0;
+        xspd = 0;
+        return;
+    }
+
     // === GRAPPLE EDGE DETECTION ===
     grappleJustReleased = false;
     var _grappleHeld    = (grappleKey != 0);
@@ -25,11 +36,26 @@ function processInput() {
     grappleKeyPrev    = _grappleHeld;
     grappleKeyPressed = _grapplePressed;
 
+    // === PARRY EDGE DETECTION ===
+    parryJustReleased = false;
+    var _parryHeld = (parryKeyHeld != 0);
+    if (!_parryHeld && parryKeyPrev) {
+        parryJustReleased = true;
+    }
+    parryKeyPrev = _parryHeld;
+
     // === DASH / BACKSTEP INPUT ===
     var _moveInput = (leftKey || rightKey);
 
+    // Charge parry can be canceled by a dash — clear parry state first so the
+    // dash trigger below fires normally.
+    if (isParrying && parryState == ParryState.P_CHARGING
+    && dashKey && dashCharges > 0) {
+        endParry();
+    }
+
     // Backstep: grounded, no directional input, has charges
-    if (!isDashing && !isBackStepping && onGround && dashCooldownTimer <= 0
+    if (!isDashing && !isBackStepping && !isParrying && !isHurt && onGround && dashCooldownTimer <= 0
     && dashKey && !_moveInput && dashCharges > 0) {
         isBackStepping    = true;
         dashCharges--;
@@ -41,7 +67,7 @@ function processInput() {
         lockY             = true;
 
     // Dash: has directional input, has charges
-    } else if (!isDashing && !isBackStepping && dashCooldownTimer <= 0
+    } else if (!isDashing && !isBackStepping && !isParrying && !isHurt && dashCooldownTimer <= 0
     && dashKey && _moveInput && dashCharges > 0) {
         isDashing   = true;
         dashCharges--;
@@ -70,9 +96,42 @@ function processInput() {
         jumpKey         = 0;
     }
 
+    // Block jump during non-cancelable parry states (charge parry handles its
+    // own jump cancel inside processParry).
+    if (isParrying && parryState != ParryState.P_CHARGING) {
+        jumpKeyPressed  = 0;
+        jumpKeyBuffered = 0;
+        jumpKey         = 0;
+    }
+
+    // === PARRY INPUT ===
+    // Sequential parry: still in initial/sequential parry, already had a successful
+    // hit, press parry again → reduced window chained parry.
+    if (isParrying
+    && (parryState == ParryState.P_INITIAL || parryState == ParryState.P_SEQUENTIAL)
+    && parrySuccess && parryKey) {
+        parryState          = ParryState.P_SEQUENTIAL;
+        parryFrame          = 0;
+        parrySuccess        = false;
+        isParryWindowActive = false;
+
+    // Fresh parry: not already parrying, no cooldown/downtime active.
+    } else if (!isParrying && !isDashing && !isBackStepping && !isAttacking && !isClimbing
+    && !isHurt && !grappling && parryCooldownTimer <= 0 && parryDowntimeTimer <= 0 && parryKey) {
+        isParrying          = true;
+        parryState          = ParryState.P_INITIAL;
+        parryFrame          = 0;
+        isParryWindowActive = false;
+        parrySuccess        = false;
+        parryCharge         = 0;
+        parryChargeLevel    = 0;
+        xspd                = 0;
+        yspd                = 0;
+    }
+
     // === ATTACK INPUT ===
     // Ground attacks
-    if (!isAttacking && !isDashing && !isClimbing && !grappling && onGround && attackKey) {
+    if (!isAttacking && !isDashing && !isParrying && !isClimbing && !isHurt && !grappling && onGround && attackKey) {
         if (downKey) {
             attackName     = "crouch";
             isAttacking    = true;
@@ -95,7 +154,7 @@ function processInput() {
     }
 
     // Air attack
-    if (!isAttacking && !isDashing && !isClimbing && !grappling && !onGround && attackKey) {
+    if (!isAttacking && !isDashing && !isParrying && !isClimbing && !isHurt && !grappling && !onGround && attackKey) {
         attackName     = "jump";
         isAttacking    = true;
         attackFrame    = 0;
@@ -115,4 +174,10 @@ function tickInputLocks() {
     if (inputLockMove > 0) inputLockMove--;
     if (inputLockFace > 0) inputLockFace--;
     if (inputLockJump > 0) inputLockJump--;
+
+    // Hit reaction timer — ends the spr_hit reaction when it runs out
+    if (hurtTimer > 0) {
+        hurtTimer--;
+        if (hurtTimer <= 0) { isHurt = false; }
+    }
 }

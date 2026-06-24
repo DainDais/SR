@@ -45,7 +45,19 @@ function updateAnimation() {
     var _newSprite = sprite_index;
     var _resetAnim = false;
 
-    if (isAttacking) {
+    if (variable_instance_exists(self, "isStunned") && isStunned) {
+        // Posture-break stun — locked in spr_stun, looping
+        _newSprite    = stunSpr;
+        animFrameHold = false;
+        image_speed   = 1;
+
+    } else if (variable_instance_exists(self, "isHurt") && isHurt) {
+        // Hit reaction — plays spr_hit (hurtTimer ends it after one cycle)
+        _newSprite    = hitSpr;
+        animFrameHold = false;
+        image_speed   = 1;
+
+    } else if (isAttacking) {
         var _attackData = attackTable[$ attackName];
         if (_attackData != undefined) {
             _newSprite = _attackData.sprite;

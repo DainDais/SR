@@ -31,7 +31,7 @@
   "origin":7,
   "parent":{
     "name":"Basic movement",
-    "path":"folders/Sprites/Animations/Basic movement.yy",
+    "path":"folders/Sprites/Animations 1/Basic movement.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

@@ -26,7 +26,7 @@
   "origin":7,
   "parent":{
     "name":"Jump",
-    "path":"folders/Sprites/Animations/Basic movement/Jump.yy",
+    "path":"folders/Sprites/Animations 1/Basic movement/Jump.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

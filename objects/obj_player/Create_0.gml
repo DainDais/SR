@@ -1,3 +1,89 @@
+// === IDENTITY & HEALTH ===
+team = "player";
+// initHealth(hp, maxHp, invincibleFrames)
+// invincibleFrames=30 gives half a second of immunity after each hit
+initHealth(100, 100, 30);
+
+// === MP ===
+mp     = 100;
+mp_max = 100;
+
+// === POSTURE ===
+// TESTING values (was 100/100) — small max so posture changes read clearly.
+posture     = 8;
+posture_max = 8;
+
+// --- Posture damage modifiers ---
+postureGuardMult  = 0.5;  // guarding (held charge-parry stance) takes half posture damage
+postureVulnMult   = 1.5;  // UNDER-parry vulnerability window: incoming posture damage x1.5
+postureVulnFrames = 90;   // length of the under-parry vulnerability window (frames)
+postureVulnTimer  = 0;    // counts down while > 0; opened by an under-parry
+
+// === HIT / STUN REACTION ===
+hitSpr  = spr_hit;
+stunSpr = spr_stun;
+
+isHurt        = false;                       // brief hit reaction (plays spr_hit once)
+hurtTimer     = 0;                           // counts down the hit reaction
+hitStunFrames = sprite_get_number(spr_hit);  // reaction length = hit anim length; also the i-frame duration
+
+isStunned     = false;                       // posture-break stun: locked in spr_stun until hit
+
+// Hit reaction hook — called by take_damage. Cancels transient actions, knocks the
+// player out of a posture stun, then enters the spr_hit reaction.
+onHurt = method(self, function() {
+    // A fresh hit knocks the player out of a posture-break stun
+    if (isStunned) {
+        isStunned = false;
+        posture   = posture_max;   // posture break consumed — refill so they don't instantly re-stun
+    }
+
+    // Cancel transient combat actions so the hit reaction actually plays.
+    // endAttack() also destroys the live attack hitbox so it can't linger.
+    if (isAttacking)  { endAttack(); }
+    isBackStepping = false;
+    isDashing      = false;
+    grappling      = false;
+    if (isParrying)   { endParry(); }
+
+    // Enter hit reaction: lock movement/face/jump for the hit animation's length
+    isHurt        = true;
+    hurtTimer     = hitStunFrames;
+    inputLockMove = hitStunFrames;
+    inputLockFace = hitStunFrames;
+    inputLockJump = hitStunFrames;
+
+    // Clear movement/gravity overrides so knockback applies cleanly
+    lockX           = false;
+    lockY           = false;
+    gravityOverride = false;
+});
+
+// Posture-break hook — called by take_posture_damage when posture reaches 0.
+onPostureBreak = method(self, function() {
+    isStunned = true;
+
+    // Stun overrides any hit reaction
+    isHurt    = false;
+    hurtTimer = 0;
+
+    // Fully exposed during the stun so the next hit can knock the player out
+    isInvincible    = false;
+    invincibleTimer = 0;
+
+    // Drop any in-progress actions and freeze in place
+    // (endAttack() destroys the live attack hitbox so it can't linger.)
+    if (isAttacking)  { endAttack(); }
+    isBackStepping = false;
+    isDashing      = false;
+    grappling      = false;
+    if (isParrying)   { endParry(); }
+    xspd            = 0;
+    lockX           = false;
+    lockY           = false;
+    gravityOverride = false;
+});
+
 #region BASIC MOVEMENT VARIABLES
 	xspd = 0;
 	yspd = 0;
@@ -457,6 +543,13 @@
 	myHurtbox.debug_color = c_red;
 #endregion
 
+#region DEBUG FLAGS
+	// Global flag so any hitbox created AFTER the toggle is pressed still shows up
+	global.debugShowHitboxes = false;
+	// F2 hides/shows the entire debug overlay
+	global.debugOverlayVisible = true;
+#endregion
+
 #region ATTACK SYSTEM
 	// Attack state tracking
 	isAttacking = false;
@@ -517,11 +610,68 @@
 	        width:          45,
 	        height:         45,
 	        cancelOnAir:    false,
-	        cancelOnGround: true,
-	        holdLastFrame:  true,
+	        cancelOnGround: false,
+	        holdLastFrame:  false,
 	        debugColor:     c_aqua,
 	        hitboxSpawned:  false,
 	    },
+	}
+#endregion
+
+#region PARRY SYSTEM
+	// State tracking
+	isParrying          = false;
+	parryState          = 0;    // set by ParryState enum below
+	parryFrame          = 0;    // frames elapsed in current parry state
+	isParryWindowActive = false;
+	parrySuccess        = false; // reset on endParry(), not on sequential entry
+	parryJustReleased   = false; // set each frame in processInput()
+	parryKeyPrev        = false; // previous-frame held state
+
+	// Nudge (brief push applied on successful parry)
+	parryNudgeTimer = 0;
+	parryNudgeX     = 0;
+
+	// ----- Initial parry -----
+	parryDuration        = 22;  // total state length in frames
+	parryStartupFrames   = 3;   // frames before window opens
+	parryWindowFrames    = 10;  // active window length
+
+	// ----- Sequential parry -----
+	parrySeqDuration     = 18;
+	parrySeqWindowFrames = 5;
+
+	// ----- Charge transition -----
+	parryChargeStartFrames = 14; // frames held before switching to P_CHARGING
+
+	// ----- Charge accumulation -----
+	parryCharge      = 0;
+	parryChargeGain  = 1;       // charge per frame
+	parryChargeLevel = 0;       // resolved stage (0 = none, 1/2/3 = levels)
+
+	// How much total charge is required to reach each level (0-indexed → level 1, 2, 3)
+	parryChargeLevelLimits[0] = 25;
+	parryChargeLevelLimits[1] = 55;
+	parryChargeLevelLimits[2] = 90;
+	parryChargeMaxLevel       = 3;
+
+	// ----- Charge active window -----
+	parryChargeActiveDuration = 12; // frames the charge parry window stays open
+
+	// ----- Cooldown (failed parry — no successful hit) -----
+	parryCooldownFrames = 20;
+	parryCooldownTimer  = 0;
+
+	// ----- Downtime (overcharged parry) -----
+	parryDowntimeFrames = 35;
+	parryDowntimeTimer  = 0;
+
+	enum ParryState {
+	    P_NONE          = 0,
+	    P_INITIAL       = 1,
+	    P_SEQUENTIAL    = 2,
+	    P_CHARGING      = 3,
+	    P_CHARGE_ACTIVE = 4
 	}
 #endregion
 

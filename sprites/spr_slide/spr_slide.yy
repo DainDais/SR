@@ -29,7 +29,7 @@
   "origin":7,
   "parent":{
     "name":"Advanced Movements",
-    "path":"folders/Sprites/Animations/Advanced Movements.yy",
+    "path":"folders/Sprites/Animations 1/Advanced Movements.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
